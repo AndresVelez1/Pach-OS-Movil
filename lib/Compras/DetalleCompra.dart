@@ -17,7 +17,7 @@ class DetalleCompra extends StatefulWidget {
 
 Future<List<dynamic>> fetchDetallesCompra(int idCompra) async {
   final response = await http.get(Uri.parse(
-      'https://localhost:7229/Compras/GetDetallesCompra?id=$idCompra'));
+      'http://pruebaproduccion-001-site1.ftempurl.com/Compras/GetDetallesCompra?id=$idCompra'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;
@@ -28,7 +28,7 @@ Future<List<dynamic>> fetchDetallesCompra(int idCompra) async {
 
 Future<List<dynamic>> fetchCompra(int idCompra) async {
   final response = await http
-      .get(Uri.parse('https://localhost:7229/Compras/CompraApi?id=$idCompra'));
+      .get(Uri.parse('http://pruebaproduccion-001-site1.ftempurl.com/Compras/CompraApi?id=$idCompra'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;

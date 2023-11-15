@@ -27,8 +27,8 @@ Future<List<dynamic>> fetchDetallesCompra(int idCompra) async {
 }
 
 Future<List<dynamic>> fetchCompra(int idCompra) async {
-  final response = await http
-      .get(Uri.parse('http://pruebaproduccion-001-site1.ftempurl.com/Compras/CompraApi?id=$idCompra'));
+  final response = await http.get(Uri.parse(
+      'http://pruebaproduccion-001-site1.ftempurl.com/Compras/CompraApi?id=$idCompra'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;
@@ -116,8 +116,9 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                     return Text('${snapshot.error}');
                   }
 
-                  // By default, show a loading spinner.
-                  return CircularProgressIndicator();
+                  return Center(
+                    child: Image.asset('img/pizza_loading.gif'),
+                  );
                 },
               ),
               Expanded(
@@ -129,8 +130,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: EdgeInsets.fromLTRB(30.0, 2.0, 30.0,
-                                2.0), // Agrega un espacio alrededor de cada tarjeta
+                            padding: EdgeInsets.fromLTRB(30.0, 2.0, 30.0, 2.0),
                             child: Stack(
                               children: <Widget>[
                                 Card(
@@ -163,10 +163,8 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                                     ),
                                   ),
                                 ),
-                                // Aquí es donde usamos Positioned para mover el precio
                                 Positioned(
-                                  top:
-                                      22, // Ajusta este valor para mover el precio hacia arriba o hacia abajo
+                                  top: 22,
                                   right: 25,
                                   child: Text(
                                     '\$${NumberFormat('#,##0', 'es_CO').format(snapshot.data![index]['precioInsumo'] ?? 0)}',
@@ -186,15 +184,16 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                       return Text('${snapshot.error}');
                     }
 
-                    // By default, show a loading spinner.
-                    return CircularProgressIndicator();
+                    return Center(
+                      child: Image.asset('img/pizza_loading.gif'),
+                    );
                   },
                 ),
               ),
             ],
           ),
           Positioned(
-            top: 15, // puedes ajustar estos valores según tus necesidades
+            top: 15,
             left: 15,
             child: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),

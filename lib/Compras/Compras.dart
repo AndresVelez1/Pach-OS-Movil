@@ -1,10 +1,13 @@
-// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings, use_key_in_widget_constructors, library_private_types_in_public_api, file_names
+// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings, use_key_in_widget_constructors, library_private_types_in_public_api, file_names, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'DetalleCompra.dart';
 import 'package:intl/intl.dart';
+import 'package:pach_os_movil/Dashboard/Dashboard.dart';
+import 'package:pach_os_movil/Ventas/Ventas.dart';
+import 'package:pach_os_movil/main.dart';
 
 class Compras extends StatefulWidget {
   @override
@@ -12,8 +15,8 @@ class Compras extends StatefulWidget {
 }
 
 Future<List<dynamic>> fetchCompras() async {
-  final response =
-      await http.get(Uri.parse('http://pruebaproduccion-001-site1.ftempurl.com/Compras/GetCompras'));
+  final response = await http.get(Uri.parse(
+      'http://pruebaproduccion-001-site1.ftempurl.com/Compras/GetCompras'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;
@@ -77,13 +80,179 @@ class _ComprasState extends State<Compras> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+        title: Text(''),
+      ),
+      drawer: Drawer(
+        child: Container(
+          color: Colors.black,
+          width: MediaQuery.of(context).size.width / 2,
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(150.0),
+                  child: SizedBox(
+                    height: 150,
+                    width: 150,
+                    child: Image.network('img/descargar.jfif'),
+                  ),
+                ),
+              ),
+              ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.only(top: 100.0),
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(right: 20.0, left: 10),
+                        child: Icon(
+                          Icons.insert_chart,
+                          color: Color.fromRGBO(255, 199, 0, 1),
+                          size: 35,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Dashboard',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Dashboard()),
+                  );
+                },
+              ),
+              ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(right: 30.0, left: 10),
+                        child: Icon(
+                          Icons.local_pizza,
+                          color: Color.fromRGBO(255, 199, 0, 1),
+                          size: 35,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Compras',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Compras()),
+                  );
+                },
+              ),
+              ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(right: 45, left: 10),
+                        child: Icon(
+                          Icons.monetization_on,
+                          color: Color.fromRGBO(255, 199, 0, 1),
+                          size: 35,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Ventas',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Ventas()),
+                  );
+                },
+              ),
+              Expanded(
+                child: Container(),
+              ),
+              ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(right: 2, left: 80),
+                        child: Icon(
+                          Icons.exit_to_app,
+                          color: Color.fromRGBO(255, 199, 0, 1),
+                          size: 35,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Salir',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyApp()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
       body: FutureBuilder<List<dynamic>>(
         future: futureComprasFiltered,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Padding(
-                padding: EdgeInsets.all(
-                    8.0), // Agrega un espacio alrededor de la lista
+                padding: EdgeInsets.all(8.0),
                 child: Column(
                   children: <Widget>[
                     SizedBox(height: 10),
@@ -109,30 +278,24 @@ class _ComprasState extends State<Compras> {
                     SizedBox(height: 40),
                     Container(
                       padding: EdgeInsets.all(10.0),
-                      width: 450, // Establece el ancho del TextField
+                      width: 450,
                       child: TextField(
                         controller: searchController,
-                        textAlign:
-                            TextAlign.left, // Mueve el texto a la derecha
+                        textAlign: TextAlign.left,
                         decoration: InputDecoration(
                           hintText: 'Buscar...',
-                          contentPadding: EdgeInsets.fromLTRB(
-                              15, 0, 0, 0), // Agrega un padding izquierdo
+                          contentPadding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Establece el radio de las esquinas
+                            borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide(
                                 color: const Color.fromARGB(255, 234, 229, 229),
-                                width:
-                                    2), // Establece el color y el ancho de la línea
+                                width: 2),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                                20), // Establece el radio de las esquinas
+                            borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(
                                 color: Color.fromRGBO(255, 199, 0, 1),
-                                width:
-                                    2), // Establece el color y el ancho de la línea
+                                width: 2),
                           ),
                         ),
                       ),
@@ -142,8 +305,7 @@ class _ComprasState extends State<Compras> {
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: EdgeInsets.fromLTRB(30.0, 2.0, 30.0,
-                                2.0), // Agrega un espacio alrededor de cada tarjeta
+                            padding: EdgeInsets.fromLTRB(30.0, 2.0, 30.0, 2.0),
                             child: Stack(
                               children: <Widget>[
                                 Card(
@@ -213,10 +375,8 @@ class _ComprasState extends State<Compras> {
                                     },
                                   ),
                                 ),
-                                // Aquí es donde usamos Positioned para mover el total
                                 Positioned(
-                                  top:
-                                      29, // Ajusta este valor para mover el total hacia arriba o hacia abajo
+                                  top: 29,
                                   right: 25,
                                   child: Text(
                                     '\$${NumberFormat('#,##0', 'es_CO').format(snapshot.data![index]['total'] ?? 0)}',
@@ -239,7 +399,9 @@ class _ComprasState extends State<Compras> {
             return Text('${snapshot.error}');
           }
 
-          return CircularProgressIndicator();
+          return Center(
+            child: Image.asset('img/pizza_loading.gif'),
+          );
         },
       ),
     );

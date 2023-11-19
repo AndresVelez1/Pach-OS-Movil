@@ -367,7 +367,7 @@ class _VentasState extends State<Ventas> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => DetalleVenta(
-                                              idCompra: snapshot.data![index]
+                                              idVenta: snapshot.data![index]
                                                   ['idVenta']),
                                         ),
                                       );

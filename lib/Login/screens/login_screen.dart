@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pach_os_movil/Dashboard/Dashboard.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -43,6 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       print('Error de inicio de sesión: ${response.statusCode}');
       print('Mensaje: ${jsonDecode(response.body)['Message']}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Credenciales incorrectas'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 

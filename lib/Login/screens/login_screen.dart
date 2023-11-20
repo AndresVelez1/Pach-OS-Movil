@@ -14,24 +14,28 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _handleLogin() async {
-    final email = _emailController.text;
+    final username = _emailController.text;
     final password = _passwordController.text;
 
     final response = await http.post(
-      Uri.parse('https://localhost:7229/api/auth/login'),
+      Uri.parse('https://localhost:7229/AuthApi/login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
-        'email': email,
-        'password': password,
+        'UserName': username,
+        'PasswordHash': password,
       }),
     );
 
     if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      print('Mensaje: ${jsonResponse['Message']}');
-      print('Datos del usuario: ${jsonResponse['User']}');
+      if (response.body.isNotEmpty) {
+        final jsonResponse = jsonDecode(response.body);
+        print('Mensaje: ${jsonResponse['Message']}');
+        print('Datos del usuario: ${jsonResponse['User']}');
+      } else {
+        print('Respuesta vacía');
+      }
     } else {
       print('Error de inicio de sesión: ${response.statusCode}');
       print('Mensaje: ${jsonDecode(response.body)['Message']}');

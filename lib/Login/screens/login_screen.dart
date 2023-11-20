@@ -1,7 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:pach_os_movil/Dashboard/Dashboard.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -30,9 +32,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response.statusCode == 200) {
       if (response.body.isNotEmpty) {
-        final jsonResponse = jsonDecode(response.body);
-        print('Mensaje: ${jsonResponse['Message']}');
-        print('Datos del usuario: ${jsonResponse['User']}');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => Dashboard(),
+          ),
+        );
       } else {
         print('Respuesta vacía');
       }

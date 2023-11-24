@@ -16,7 +16,7 @@ class Compras extends StatefulWidget {
 
 Future<List<dynamic>> fetchCompras() async {
   final response = await http.get(Uri.parse(
-      'http://pruebaproduccion-001-site1.ftempurl.com/Compras/GetCompras'));
+      'http://pachos-001-site1.btempurl.com/Compras/GetCompras'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;

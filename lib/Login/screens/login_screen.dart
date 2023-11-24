@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     final response = await http.post(
-      Uri.parse('https://localhost:7229/AuthApi/login'),
+      Uri.parse('http://pachos-001-site1.btempurl.com/AuthApi/login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

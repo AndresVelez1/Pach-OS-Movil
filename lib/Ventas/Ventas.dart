@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'DetalleVenta.dart';
-import 'package:intl/intl.dart';
 import 'package:pach_os_movil/Dashboard/Dashboard.dart';
+import 'package:intl/intl.dart';
+import 'package:pach_os_movil/Compras/Compras.dart';
 import 'package:pach_os_movil/main.dart';
 
 class Ventas extends StatefulWidget {
@@ -15,7 +16,7 @@ class Ventas extends StatefulWidget {
 
 Future<List<dynamic>> fetchVentas() async {
   final response = await http.get(Uri.parse(
-      'https://localhost:7229/Ventas/ListarVentasAPI'));
+      'http://pachos-001-site1.btempurl.com/Ventas/ListarVentasAPI'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;
@@ -169,7 +170,7 @@ class _VentasState extends State<Ventas> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Ventas()),
+                    MaterialPageRoute(builder: (context) => Compras()),
                   );
                 },
               ),

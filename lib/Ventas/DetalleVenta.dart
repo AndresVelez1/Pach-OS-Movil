@@ -6,46 +6,53 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class DetalleCompra extends StatefulWidget {
-  final int idCompra;
+class DetalleVenta extends StatefulWidget {
+  final int idVenta;
 
-  DetalleCompra({required this.idCompra});
+  DetalleVenta({required this.idVenta});
 
   @override
   _CompraDetallePageState createState() => _CompraDetallePageState();
 }
 
-Future<List<dynamic>> fetchDetallesCompra(int idCompra) async {
+Future<List<dynamic>> fetchDetallesCompra(int idVenta) async {
   final response = await http.get(Uri.parse(
-      'http://pachos-001-site1.btempurl.com/Compras/GetDetallesCompra?id=$idCompra'));
+      'http://pachos-001-site1.btempurl.com/Ventas/GetDetallesVenta?id=$idVenta'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;
   } else {
-    throw Exception('Failed to load detalles de compra: ${response.body}');
+    throw Exception('Failed to load detalles de venta: ${response.body}');
   }
 }
 
-Future<List<dynamic>> fetchCompra(int idCompra) async {
-  final response = await http.get(Uri.parse(
-      'http://pachos-001-site1.btempurl.com/Compras/CompraApi?id=$idCompra'));
+Future<List<dynamic>> fetchCompra(int idVenta) async {
+  final response = await http
+      .get(Uri.parse('http://pachos-001-site1.btempurl.com/Ventas/VentaApi?id=$idVenta'));
 
   if (response.statusCode == 200) {
-    return jsonDecode(response.body) as List<dynamic>;
+    var jsonResponse = jsonDecode(response.body);
+    if (jsonResponse is List) {
+      return jsonResponse.cast<dynamic>();
+    } else if (jsonResponse is Map) {
+      return [jsonResponse];
+    } else {
+      throw Exception('Unexpected response type: ${jsonResponse.runtimeType}');
+    }
   } else {
-    throw Exception('Failed to load compra: ${response.body}');
+    throw Exception('Failed to load venta: ${response.body}');
   }
 }
 
-class _CompraDetallePageState extends State<DetalleCompra> {
+class _CompraDetallePageState extends State<DetalleVenta> {
   late Future<List<dynamic>> futureDetallesCompra;
   late Future<List<dynamic>> futureCompra;
 
   @override
   void initState() {
     super.initState();
-    futureDetallesCompra = fetchDetallesCompra(widget.idCompra);
-    futureCompra = fetchCompra(widget.idCompra);
+    futureDetallesCompra = fetchDetallesCompra(widget.idVenta);
+    futureCompra = fetchCompra(widget.idVenta);
   }
 
   @override
@@ -63,7 +70,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
-                          title: Text('Detalles compra',
+                          title: Text('Detalles venta',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontSize: 35,
@@ -73,7 +80,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text(
-                                  'Total: \$${NumberFormat('#,##0', 'es_CO').format(snapshot.data![0]['total'] ?? 0)}',
+                                  'Total: \$${NumberFormat('#,##0', 'es_CO').format(snapshot.data![0]['totalVenta'] ?? 0)}',
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -81,16 +88,16 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                                       color: Colors.black)),
                               SizedBox(height: 20),
                               Text(
-                                'Fecha: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(snapshot.data![0]['fechaCompra'] ?? 'N/A'))}',
+                                'Fecha: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(snapshot.data![0]['fechaVenta'] ?? 'N/A'))}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontFamily: 'Poppins'),
                               ),
                               Text(
-                                  'Número de Factura: ${snapshot.data![0]['numeroFactura']}',
+                                  'N° de venta: ${snapshot.data![0]['idVenta']}',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(fontFamily: 'Poppins')),
                               Text(
-                                  'Proveedor: ${snapshot.data![0]['nomLocal']}',
+                                  'Metodo de pago: ${snapshot.data![0]['tipoPago']}',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
@@ -100,7 +107,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(fontFamily: 'Poppins')),
                               SizedBox(height: 20),
-                              Text('Insumos comprados',
+                              Text('Productos vendidos',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 30,
@@ -140,7 +147,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                                     leading: Icon(Icons.local_pizza,
                                         color: Color(0xFFFFC700)),
                                     title: Text(
-                                      '${snapshot.data![index]['nomInsumo'] ?? 'N/A'}',
+                                      '${snapshot.data![index]['nomProducto'] ?? 'N/A'}',
                                       style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 17,
@@ -151,7 +158,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                                       children: <Widget>[
                                         Expanded(
                                           child: Text(
-                                            '${snapshot.data![index]['cantidad'] ?? 'N/A'} ${snapshot.data![index]['medida'] ?? 'N/A'}',
+                                            '${snapshot.data![index]['cantVendida'] ?? 'N/A'}',
                                             style: TextStyle(
                                                 color: Colors.grey,
                                                 fontSize: 12,
@@ -167,7 +174,7 @@ class _CompraDetallePageState extends State<DetalleCompra> {
                                   top: 22,
                                   right: 25,
                                   child: Text(
-                                    '\$${NumberFormat('#,##0', 'es_CO').format(snapshot.data![index]['precioInsumo'] ?? 0)}',
+                                    '\$${NumberFormat('#,##0', 'es_CO').format(snapshot.data![index]['precio'] ?? 0)}',
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 20,

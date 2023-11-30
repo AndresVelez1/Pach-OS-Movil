@@ -23,31 +23,29 @@ class Dashboard extends StatelessWidget {
     }
   }
 
- Future<List<FlSpot>> fetchChartData(
-    String apiUrl, String dateKey, String valueKey) async {
-  final response = await http.get(Uri.parse(apiUrl));
-  if (response.statusCode != 200) {
-    throw Exception('Failed to load data from API: ${response.body}');
+  Future<List<FlSpot>> fetchChartData(
+      String apiUrl, String dateKey, String valueKey) async {
+    final response = await http.get(Uri.parse(apiUrl));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load data from API: ${response.body}');
+    }
+
+    final List data = jsonDecode(response.body);
+
+    final uniqueDates = Set<String>();
+    final spots = data
+        .where((entry) =>
+            entry[valueKey] is num && !(entry[valueKey] as num).isNaN)
+        .map<FlSpot>((entry) {
+      final date = DateTime.parse(entry[dateKey]);
+      final formattedDate = '${date.year}-${date.month}';
+
+      uniqueDates.add(formattedDate);
+      return FlSpot(date.month.toDouble(), entry[valueKey].toDouble());
+    }).toList();
+
+    return spots;
   }
-
-  final List data = jsonDecode(response.body);
-
-
-  final uniqueDates = Set<String>();
-  final spots = data
-      .where((entry) =>
-          entry[valueKey] is num && !(entry[valueKey] as num).isNaN)
-      .map<FlSpot>((entry) {
-    final date = DateTime.parse(entry[dateKey]);
-    final formattedDate = '${date.year}-${date.month}';
-
-    uniqueDates.add(formattedDate);
-    return FlSpot(date.month.toDouble(), entry[valueKey].toDouble());
-  }).toList();
-
-
-  return spots;
-}
 
   @override
   Widget build(BuildContext context) {
@@ -219,10 +217,30 @@ class Dashboard extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            // Título "Informes"
+            SizedBox(height: 10),
+            Text(
+              'Informes',
+              style: TextStyle(
+                fontSize: 55,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            SizedBox(height: 10),
+            // Subtítulo "Información general del negocio"
+            Text(
+              'Información general del negocio',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Poppins'),
+            ),
+            SizedBox(height: 16),
             // Primer bloque con las primeras cuatro cartas
             GridView.count(
               crossAxisCount: 2,
@@ -279,7 +297,18 @@ class Dashboard extends StatelessWidget {
                 formatValue: true,
               ),
             ),
+            SizedBox(height: 10),
+            Text(
+              'Productos mas vendidos',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+            ),
+
             SizedBox(height: 16),
+            
             FutureBuilder<List<Map<String, dynamic>>>(
               future: fetchProductData(
                   'http://pachos-001-site1.btempurl.com/Estadisticas/ProductosMasVendidosMes'),
@@ -291,11 +320,14 @@ class Dashboard extends StatelessWidget {
                 } else {
                   final products = snapshot.data;
 
-                  // Find the maximum sold quantity for normalization
-                  final maxSoldQuantity = products!
+                  // Find the maximum total sold
+                  final maxTotalSold = products!
                       .map<int>(
-                          (product) => product['cantidadVendida'] as int ?? 0)
+                          (product) => product['totalVendido'] as int ?? 0)
                       .reduce(max);
+
+                  // Calculate 110% of the maximum total sold to set as the new maximum value for progress
+                  final adjustedMaxValue = maxTotalSold * 1.1;
 
                   return Column(
                     children: products!.map<Widget>((product) {
@@ -303,44 +335,57 @@ class Dashboard extends StatelessWidget {
                       final soldQuantity =
                           product['cantidadVendida'] as int ?? 0;
                       final totalSold = product['totalVendido'] as int ?? 0;
-                      // Normalize the progress to be in the range [0, 1]
-                      final progress = soldQuantity / (maxSoldQuantity + 1);
 
-                      return Column(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              text: productName,
-                              style:
-                                  TextStyle(fontSize: 24), // Adjusted font size
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: ' (${soldQuantity.toString()})',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
+                      // Adjust the progress to be in the range [0, 1] based on the adjustedMaxValue
+                      final progress = totalSold / adjustedMaxValue;
+
+                      return Container(
+                        color: Color(0xFFEEF8F6),
+                        margin: EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                text: productName,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  fontFamily: 'Poppins',
                                 ),
-                              ],
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: ' (${soldQuantity.toString()})',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          LinearProgressIndicator(
-                            value: progress,
-                            color:
-                                Color.fromRGBO(255, 199, 0, 1), // Custom color
-                            backgroundColor:
-                                Colors.grey[200], // Custom background color
-                          ),
-                          Text(
-                            'Total vendido: \$${totalSold.toString()}',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
+                            LinearProgressIndicator(
+                              value: progress,
+                              color: Color.fromRGBO(255, 199, 0, 1),
+                              backgroundColor: Colors.grey[200],
+                            ),
+                            Text(
+                              'Total vendido: ${formatCurrency(totalSold)}',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     }).toList(),
                   );
                 }
               },
             ),
+
             SizedBox(height: 16),
             // Bloque con la gráfica de líneas
             FutureBuilder<List<FlSpot>>(
@@ -432,6 +477,7 @@ class Dashboard extends StatelessWidget {
                 color: Color(0xff68737d),
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                fontFamily: 'Poppins',
               ),
               getTitles: (value) {
                 // Convertir el valor a un entero y mostrarlo
@@ -443,9 +489,9 @@ class Dashboard extends StatelessWidget {
             leftTitles: SideTitles(
               showTitles: true,
               getTextStyles: (context, value) => const TextStyle(
-                color: Color(0xff67727d),
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
+                fontFamily: 'Poppins',
               ),
               getTitles: (value) {
                 // Puedes personalizar las etiquetas del eje Y aquí según tu necesidad
@@ -509,6 +555,7 @@ class Dashboard extends StatelessWidget {
               formatValue ? formatCurrency(total) : total.toString();
 
           return Card(
+            color: Color(0xFFEEF8F6),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -521,15 +568,18 @@ class Dashboard extends StatelessWidget {
                   ),
                   Text(
                     formattedTotal,
-                    style:
-                        TextStyle(fontSize: 24), // Tamaño de fuente más grande
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Poppins',
+                    ), // Tamaño de fuente más grande
                   ),
                   SizedBox(height: 8),
                   Text(
                     title,
                     style: TextStyle(
-                        fontSize:
-                            16), // Tamaño de fuente más pequeño para el título
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                    ), // Tamaño de fuente más pequeño para el título
                   ),
                 ],
               ),
@@ -579,6 +629,7 @@ class Dashboard extends StatelessWidget {
               formatValue ? formatCurrency(total) : total.toString();
 
           return Card(
+            color: Color(0xFFEEF8F6),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -589,12 +640,18 @@ class Dashboard extends StatelessWidget {
                   ),
                   Text(
                     formattedTotal,
-                    style: TextStyle(fontSize: 24),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                   SizedBox(height: 8),
                   Text(
                     title,
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 ],
               ),
@@ -635,18 +692,25 @@ class Dashboard extends StatelessWidget {
                     ? formatCurrency(difference)
                     : difference.toString();
                 return Card(
+                  color: Color(0xFFEEF8F6),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
                         Text(
                           formattedDifference,
-                          style: TextStyle(fontSize: 24), // Adjusted font size
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontFamily: 'Poppins',
+                          ), // Adjusted font size
                         ),
                         SizedBox(height: 8),
                         Text(
                           'Diferencia entre Ventas y Compras',
-                          style: TextStyle(fontSize: 16), // Adjusted font size
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                          ), // Adjusted font size
                         ),
                       ],
                     ),

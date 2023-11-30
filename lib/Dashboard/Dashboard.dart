@@ -470,35 +470,12 @@ class Dashboard extends StatelessWidget {
           ),
           titlesData: FlTitlesData(
             show: true,
-            bottomTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 22,
-              getTextStyles: (context, value) => const TextStyle(
-                color: Color(0xff68737d),
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                fontFamily: 'Poppins',
-              ),
-              getTitles: (value) {
-                // Convertir el valor a un entero y mostrarlo
-                final month = value.toInt();
-                return month.toString();
-              },
-              margin: 8,
+            bottomTitles: AxisTitles(
+              axisNameSize: 3.0,
             ),
-            leftTitles: SideTitles(
-              showTitles: true,
-              getTextStyles: (context, value) => const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                fontFamily: 'Poppins',
-              ),
-              getTitles: (value) {
-                // Puedes personalizar las etiquetas del eje Y aquí según tu necesidad
-                return value.toString();
-              },
-              reservedSize: 28,
-              margin: 12,
+            leftTitles: AxisTitles(
+              axisNameSize: 3.0,
+              
             ),
           ),
           borderData: FlBorderData(
@@ -516,8 +493,7 @@ class Dashboard extends StatelessWidget {
           lineBarsData: [
             LineChartBarData(
               spots: data,
-              isCurved: true,
-              colors: [color],
+              show: true,
               barWidth: 4,
               isStrokeCapRound: true,
               dotData: FlDotData(
@@ -525,7 +501,6 @@ class Dashboard extends StatelessWidget {
               ),
               belowBarData: BarAreaData(
                 show: true,
-                colors: [color.withOpacity(0.3)],
               ),
             ),
           ],

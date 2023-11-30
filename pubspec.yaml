@@ -61,7 +61,7 @@ dev_dependencies:
 flutter:
   assets:
     - img/pizza_loading.gif
-  
+    - img/pizza.jpg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

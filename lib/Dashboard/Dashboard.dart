@@ -28,6 +28,7 @@ class Dashboard extends StatelessWidget {
     final format = DateFormat('yyyy-M');
     return format.parse(date);
   }
+
   Future<List<FlSpot>> fetchChartData(
       String apiUrl, String dateKey, String valueKey) async {
     final response = await http.get(Uri.parse(apiUrl));
@@ -59,15 +60,31 @@ class Dashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+        title: Container(
+          width: double
+              .infinity, // Esto hace que el contenedor ocupe todo el ancho disponible
+          height: 200.0, // Define un tamaño para el contenedor
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: <Widget>[
+              Positioned(
+                top:
+                    20.0, // Ajusta este valor para mover la imagen hacia arriba o hacia abajo
+                right:
+                    160, // Ajusta este valor para mover la imagen hacia la izquierda o hacia la derecha
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(150.0),
+                  child: SizedBox(
+                    height: 150,
+                    width: 150,
+                    child: Image.asset('img/pizza.jpg'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        title: Text(''),
+        backgroundColor: Color(0xFFFFC700),
       ),
       drawer: Drawer(
         child: Container(
@@ -474,23 +491,18 @@ class Dashboard extends StatelessWidget {
             },
           ),
           titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              axisNameSize: 6.0,
-              sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: bottomTitleWidgets,
-                  interval: 1.0),
-            ),
-            leftTitles: AxisTitles(
-              axisNameSize: 6.0,
-            ),
-            topTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: false
-              )
-            )
-          ),
+              show: true,
+              bottomTitles: AxisTitles(
+                axisNameSize: 6.0,
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: bottomTitleWidgets,
+                    interval: 1.0),
+              ),
+              leftTitles: AxisTitles(
+                axisNameSize: 6.0,
+              ),
+              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false))),
           borderData: FlBorderData(
             show: true,
           ),

@@ -23,6 +23,11 @@ class Dashboard extends StatelessWidget {
     }
   }
 
+//--Apertura de un codigo para la grafica (1)--
+  DateTime parseDate(String date) {
+    final format = DateFormat('yyyy-M');
+    return format.parse(date);
+  }
   Future<List<FlSpot>> fetchChartData(
       String apiUrl, String dateKey, String valueKey) async {
     final response = await http.get(Uri.parse(apiUrl));
@@ -32,20 +37,23 @@ class Dashboard extends StatelessWidget {
 
     final List data = jsonDecode(response.body);
 
-    final uniqueDates = Set<String>();
-    final spots = data
-        .where((entry) =>
-            entry[valueKey] is num && !(entry[valueKey] as num).isNaN)
-        .map<FlSpot>((entry) {
-      final date = DateTime.parse(entry[dateKey]);
-      final formattedDate = '${date.year}-${date.month}';
+    // Genera un conjunto de fechas para todos los meses del año
+    final uniqueDates = <String>{};
+    for (var month = 1; month <= 12; month++) {
+      uniqueDates.add('${DateTime.now().year}-$month');
+    }
 
-      uniqueDates.add(formattedDate);
-      return FlSpot(date.month.toDouble(), entry[valueKey].toDouble());
+    final spots = uniqueDates.map<FlSpot>((date) {
+      final entry = data.firstWhere(
+          (entry) => parseDate(entry[dateKey]).toString().startsWith(date),
+          orElse: () => {valueKey: 0});
+      return FlSpot(
+          parseDate(date).month.toDouble(), entry[valueKey].toDouble());
     }).toList();
 
     return spots;
   }
+//--Cierre de un codigo para la grafica (1)--
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +316,7 @@ class Dashboard extends StatelessWidget {
             ),
 
             SizedBox(height: 16),
-            
+
             FutureBuilder<List<Map<String, dynamic>>>(
               future: fetchProductData(
                   'http://pachos-001-site1.btempurl.com/Estadisticas/ProductosMasVendidosMes'),
@@ -388,6 +396,7 @@ class Dashboard extends StatelessWidget {
 
             SizedBox(height: 16),
             // Bloque con la gráfica de líneas
+            //--Apertura del segundo codigo para la grafica--
             FutureBuilder<List<FlSpot>>(
               future: fetchChartData(
                 'http://pachos-001-site1.btempurl.com/Estadisticas/VentasAño',
@@ -401,63 +410,59 @@ class Dashboard extends StatelessWidget {
                   return Text('Error en ventas: ${snapshotVentas.error}');
                 } else {
                   final ventasData = snapshotVentas.data;
-                  print("Data ventas: $ventasData");
 
-                  if (ventasData != null && ventasData.isNotEmpty) {
-                    // Asegúrate de que la lista de datos no esté vacía
-                    return buildLineChart(ventasData, Colors.red);
-                  } else {
-                    return Text('No hay datos de ventas disponibles.');
-                  }
+                  return FutureBuilder<List<FlSpot>>(
+                    future: fetchChartData(
+                      'http://pachos-001-site1.btempurl.com/Estadisticas/ComprasAño',
+                      'fechaCompra',
+                      'total',
+                    ),
+                    builder: (context, snapshotCompras) {
+                      if (snapshotCompras.connectionState ==
+                          ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshotCompras.hasError) {
+                        return Text(
+                            'Error en compras: ${snapshotCompras.error}');
+                      } else {
+                        final comprasData = snapshotCompras.data;
+
+                        // Combina las listas de datos de ventas y compras
+                        final combinedData = [...ventasData!, ...comprasData!];
+
+                        return buildLineChart(combinedData, Colors.red);
+                      }
+                    },
+                  );
                 }
               },
             ),
-            // ...
-            FutureBuilder<List<FlSpot>>(
-              future: fetchChartData(
-                'http://pachos-001-site1.btempurl.com/Estadisticas/ComprasAño',
-                'fechaCompra',
-                'total',
-              ),
-              builder: (context, snapshotCompras) {
-                if (snapshotCompras.connectionState ==
-                    ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshotCompras.hasError) {
-                  return Text('Error en compras: ${snapshotCompras.error}');
-                } else {
-                  final comprasData = snapshotCompras.data;
-                  print("Data compras: $comprasData");
-
-                  return buildLineChart(comprasData, Colors.blue);
-                }
-              },
-            ),
+            //--Cierre para el segundo codigo de la grafica--
           ],
         ),
       ),
     );
   }
 
+//--Apertura para el tercer codigo de la grafica--
   Widget buildLineChart(List<FlSpot>? data, Color color) {
     if (data == null || data.isEmpty) {
-      print("Data received: $data");
-
       // Puedes manejar esto de una manera específica si es necesario
       return SizedBox.shrink();
     }
 
     return SizedBox(
       width: double.infinity,
-      height: 200,
+      height: 210,
       child: LineChart(
         LineChartData(
           gridData: FlGridData(
             show: true,
-            drawVerticalLine: true,
+            drawVerticalLine: false,
+            horizontalInterval: 1.0,
             getDrawingHorizontalLine: (value) {
               return FlLine(
-                color: const Color(0xff37434d),
+                color: Color.fromARGB(255, 241, 243, 245),
                 strokeWidth: 1,
               );
             },
@@ -471,16 +476,23 @@ class Dashboard extends StatelessWidget {
           titlesData: FlTitlesData(
             show: true,
             bottomTitles: AxisTitles(
-              axisNameSize: 3.0,
+              axisNameSize: 6.0,
+              sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: bottomTitleWidgets,
+                  interval: 1.0),
             ),
             leftTitles: AxisTitles(
-              axisNameSize: 3.0,
-              
+              axisNameSize: 6.0,
             ),
+            topTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: false
+              )
+            )
           ),
           borderData: FlBorderData(
             show: true,
-            border: Border.all(color: const Color(0xff37434d), width: 1),
           ),
           minX: data.first.x,
           maxX: data.last.x,
@@ -494,13 +506,13 @@ class Dashboard extends StatelessWidget {
             LineChartBarData(
               spots: data,
               show: true,
-              barWidth: 4,
-              isStrokeCapRound: true,
+              barWidth: 1,
+              isStrokeCapRound: false,
               dotData: FlDotData(
-                show: false,
+                show: true,
               ),
               belowBarData: BarAreaData(
-                show: true,
+                show: false,
               ),
             ),
           ],
@@ -508,6 +520,7 @@ class Dashboard extends StatelessWidget {
       ),
     );
   }
+//Cierre para el tercer codigo de la grafica
 
   // Método para construir las cartas básicas
   Widget buildCard({
@@ -714,4 +727,60 @@ class Dashboard extends StatelessWidget {
         .map<int>((entry) => entry[columnKey] as int? ?? 0)
         .reduce((a, b) => a + b);
   }
+
+//--Apertura ultimo codigo de la grafica--
+  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 16,
+    );
+    Widget text;
+    switch (value.toInt()) {
+      case 1:
+        text = const Text('Ene', style: style);
+        break;
+      case 2:
+        text = const Text('Feb', style: style);
+        break;
+      case 3:
+        text = const Text('Mar', style: style);
+        break;
+      case 4:
+        text = const Text('Abr', style: style);
+        break;
+      case 5:
+        text = const Text('May', style: style);
+        break;
+      case 6:
+        text = const Text('Jun', style: style);
+        break;
+      case 7:
+        text = const Text('Jul', style: style);
+        break;
+      case 8:
+        text = const Text('Ago', style: style);
+        break;
+      case 9:
+        text = const Text('Sep', style: style);
+        break;
+      case 10:
+        text = const Text('Oct', style: style);
+        break;
+      case 11:
+        text = const Text('Nov', style: style);
+        break;
+      case 12:
+        text = const Text('Dic', style: style);
+        break;
+      default:
+        text = const Text('', style: style);
+        break;
+    }
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      child: text,
+    );
+  }
+  //--Cierre de ultimo codigo de la grafica--
 }

@@ -23,22 +23,31 @@ class Dashboard extends StatelessWidget {
     }
   }
 
-  Future<List<FlSpot>> fetchChartData(
-      String apiUrl, String dateKey, String valueKey) async {
-    final response = await http.get(Uri.parse(apiUrl));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to load data from API: ${response.body}');
-    }
-
-    final List data = jsonDecode(response.body);
-    final spots = data.map<FlSpot>((entry) {
-      final date = DateTime.parse(entry[dateKey]);
-      final value = entry[valueKey].toDouble();
-      return FlSpot(date.month.toDouble(), value);
-    }).toList();
-
-    return spots;
+ Future<List<FlSpot>> fetchChartData(
+    String apiUrl, String dateKey, String valueKey) async {
+  final response = await http.get(Uri.parse(apiUrl));
+  if (response.statusCode != 200) {
+    throw Exception('Failed to load data from API: ${response.body}');
   }
+
+  final List data = jsonDecode(response.body);
+
+
+  final uniqueDates = Set<String>();
+  final spots = data
+      .where((entry) =>
+          entry[valueKey] is num && !(entry[valueKey] as num).isNaN)
+      .map<FlSpot>((entry) {
+    final date = DateTime.parse(entry[dateKey]);
+    final formattedDate = '${date.year}-${date.month}';
+
+    uniqueDates.add(formattedDate);
+    return FlSpot(date.month.toDouble(), entry[valueKey].toDouble());
+  }).toList();
+
+
+  return spots;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -347,10 +356,18 @@ class Dashboard extends StatelessWidget {
                   return Text('Error en ventas: ${snapshotVentas.error}');
                 } else {
                   final ventasData = snapshotVentas.data;
-                  return buildLineChart(ventasData, Colors.red);
+                  print("Data ventas: $ventasData");
+
+                  if (ventasData != null && ventasData.isNotEmpty) {
+                    // Asegúrate de que la lista de datos no esté vacía
+                    return buildLineChart(ventasData, Colors.red);
+                  } else {
+                    return Text('No hay datos de ventas disponibles.');
+                  }
                 }
               },
             ),
+            // ...
             FutureBuilder<List<FlSpot>>(
               future: fetchChartData(
                 'http://pachos-001-site1.btempurl.com/Estadisticas/ComprasAño',
@@ -365,6 +382,8 @@ class Dashboard extends StatelessWidget {
                   return Text('Error en compras: ${snapshotCompras.error}');
                 } else {
                   final comprasData = snapshotCompras.data;
+                  print("Data compras: $comprasData");
+
                   return buildLineChart(comprasData, Colors.blue);
                 }
               },
@@ -375,67 +394,95 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-// Función para construir la gráfica de líneas
   Widget buildLineChart(List<FlSpot>? data, Color color) {
-    if (data == null) {
-      // Podrías manejar esto de una manera específica si es necesario
+    if (data == null || data.isEmpty) {
+      print("Data received: $data");
+
+      // Puedes manejar esto de una manera específica si es necesario
       return SizedBox.shrink();
     }
 
-    final maxY = data.map((spot) => spot.y).reduce(max) * 1.1;
-
     return SizedBox(
+      width: double.infinity,
       height: 200,
       child: LineChart(
         LineChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: true,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: const Color(0xff37434d),
+                strokeWidth: 1,
+              );
+            },
+            getDrawingVerticalLine: (value) {
+              return FlLine(
+                color: const Color(0xff37434d),
+                strokeWidth: 1,
+              );
+            },
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 22,
+              getTextStyles: (context, value) => const TextStyle(
+                color: Color(0xff68737d),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              getTitles: (value) {
+                // Convertir el valor a un entero y mostrarlo
+                final month = value.toInt();
+                return month.toString();
+              },
+              margin: 8,
+            ),
+            leftTitles: SideTitles(
+              showTitles: true,
+              getTextStyles: (context, value) => const TextStyle(
+                color: Color(0xff67727d),
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+              getTitles: (value) {
+                // Puedes personalizar las etiquetas del eje Y aquí según tu necesidad
+                return value.toString();
+              },
+              reservedSize: 28,
+              margin: 12,
+            ),
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: const Color(0xff37434d), width: 1),
+          ),
+          minX: data.first.x,
+          maxX: data.last.x,
+          minY: data
+              .map((spot) => spot.y)
+              .reduce((min, value) => min > value ? value : min),
+          maxY: data
+              .map((spot) => spot.y)
+              .reduce((max, value) => max < value ? value : max),
           lineBarsData: [
             LineChartBarData(
               spots: data,
               isCurved: true,
               colors: [color],
-              dotData: FlDotData(show: false),
+              barWidth: 4,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                show: false,
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                colors: [color.withOpacity(0.3)],
+              ),
             ),
           ],
-          minY: 0,
-          maxY: maxY,
-          titlesData: FlTitlesData(
-            bottomTitles: SideTitles(
-              showTitles: true,
-              getTitles: (value) {
-                switch (value.toInt()) {
-                  case 1:
-                    return 'Jan';
-                  case 2:
-                    return 'Feb';
-                  case 3:
-                    return 'Mar';
-                  case 4:
-                    return 'Apr';
-                  case 5:
-                    return 'May';
-                  case 6:
-                    return 'Jun';
-                  case 7:
-                    return 'Jul';
-                  case 8:
-                    return 'Aug';
-                  case 9:
-                    return 'Sep';
-                  case 10:
-                    return 'Oct';
-                  case 11:
-                    return 'Nov';
-                  case 12:
-                    return 'Dec';
-                  default:
-                    return '';
-                }
-              },
-            ),
-            leftTitles: SideTitles(showTitles: true),
-          ),
-          gridData: FlGridData(show: false),
-          borderData: FlBorderData(show: false),
         ),
       ),
     );

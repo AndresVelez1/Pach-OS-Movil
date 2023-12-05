@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -13,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -31,23 +32,21 @@ class _LoginScreenState extends State<LoginScreen> {
       }),
     );
 
-    if (response.statusCode == 200) {
-      if (response.body.isNotEmpty) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => Dashboard(),
+    if (response.statusCode == 401) {
+      Map<String, dynamic>? responseBody = jsonDecode(response.body);
+      if (responseBody != null) {
+        String message = responseBody['message'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: Duration(seconds: 3),
           ),
         );
-      } else {
-        print('Respuesta vacía');
       }
     } else {
-      print('Error de inicio de sesión: ${response.statusCode}');
-      print('Mensaje: ${jsonDecode(response.body)['Message']}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Credenciales incorrectas'),
-          duration: Duration(seconds: 3),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => Dashboard(),
         ),
       );
     }
@@ -103,6 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 Container(
                   child: Form(
+                    key: _formKey,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     child: Column(
                       children: [
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: (value) {
                             String pattern =
                                 r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                            RegExp regExp = new RegExp(pattern);
+                            RegExp regExp = RegExp(pattern);
                             return regExp.hasMatch(value ?? '')
                                 ? null
                                 : 'el valor ingresado no es un correo';
@@ -156,7 +156,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           onPressed: () {
-                            _handleLogin(); // Llama al método para iniciar sesión
+                            if (_formKey.currentState!.validate()) {
+                              _handleLogin(); // Llama al método para iniciar sesión
+                            }
                           },
                         )
                       ],
@@ -242,12 +244,4 @@ class _LoginScreenState extends State<LoginScreen> {
           color: const Color.fromRGBO(255, 255, 255, 0.05)),
     );
   }
-}
-
-void main() {
-  runApp(
-    MaterialApp(
-      home: LoginScreen(),
-    ),
-  );
 }

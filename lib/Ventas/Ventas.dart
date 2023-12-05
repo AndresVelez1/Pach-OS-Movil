@@ -15,8 +15,8 @@ class Ventas extends StatefulWidget {
 }
 
 Future<List<dynamic>> fetchVentas() async {
-  final response = await http.get(Uri.parse(
-      'http://pachos-001-site1.btempurl.com/Ventas/ListarVentasAPI'));
+  final response = await http.get(
+      Uri.parse('http://pachos-001-site1.btempurl.com/Ventas/ListarVentasAPI'));
 
   if (response.statusCode == 200) {
     return jsonDecode(response.body) as List<dynamic>;
@@ -81,15 +81,31 @@ class _VentasState extends State<Ventas> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+        title: Container(
+          width: double
+              .infinity, // Esto hace que el contenedor ocupe todo el ancho disponible
+          height: 200.0, // Define un tamaño para el contenedor
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: <Widget>[
+              Positioned(
+                top:
+                    20.0, // Ajusta este valor para mover la imagen hacia arriba o hacia abajo
+                right:
+                    160, // Ajusta este valor para mover la imagen hacia la izquierda o hacia la derecha
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(150.0),
+                  child: SizedBox(
+                    height: 150,
+                    width: 150,
+                    child: Image.asset('img/pizza.jpg'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        title: Text(''),
+        backgroundColor: Color(0xFFFFC700),
       ),
       drawer: Drawer(
         child: Container(
@@ -297,6 +313,14 @@ class _VentasState extends State<Ventas> {
                                 color: Color.fromRGBO(255, 199, 0, 1),
                                 width: 2),
                           ),
+                          suffixIcon: searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear),
+                                  onPressed: () {
+                                    searchController.clear();
+                                  },
+                                )
+                              : null,
                         ),
                       ),
                     ),
@@ -332,8 +356,7 @@ class _VentasState extends State<Ventas> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Text(
-                                                snapshot.data![index]
-                                                            ['idVenta']
+                                                snapshot.data![index]['idVenta']
                                                         ?.toString() ??
                                                     'N/A',
                                                 style: TextStyle(

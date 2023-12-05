@@ -120,7 +120,7 @@ class _VentasState extends State<Ventas> {
                   child: SizedBox(
                     height: 150,
                     width: 150,
-                    child: Image.network('img/descargar.jfif'),
+                    child: Image.asset('img/descargar.jpg'),
                   ),
                 ),
               ),

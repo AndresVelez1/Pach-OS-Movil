@@ -1,9 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
 import 'dart:convert';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pach_os_movil/Dashboard/Dashboard.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -140,6 +142,39 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : 'la Contraseña debe ser mayor o igual a 6 digitos';
                           },
                         ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 15.0),
+                            child: RichText(
+                              textAlign: TextAlign.left,
+                              text: TextSpan(
+                                style:
+                                    DefaultTextStyle.of(context).style.copyWith(
+                                          decoration: TextDecoration.none,
+                                        ),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: 'Recuperar Contraseña',
+                                    style: TextStyle(
+                                        color: Colors.orange, fontSize: 12),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () async {
+                                        const url =
+                                            'http://pachos-001-site1.btempurl.com/Identity/Account/ForgotPassword';
+                                        if (await canLaunch(url)) {
+                                          await launch(url);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 30),
                         MaterialButton(
                           shape: RoundedRectangleBorder(
@@ -160,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               _handleLogin(); // Llama al método para iniciar sesión
                             }
                           },
-                        )
+                        ),
                       ],
                     ),
                   ),

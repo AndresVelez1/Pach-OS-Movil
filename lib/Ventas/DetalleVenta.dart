@@ -58,6 +58,33 @@ class _CompraDetallePageState extends State<DetalleVenta> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Container(
+          width: double
+              .infinity, // Esto hace que el contenedor ocupe todo el ancho disponible
+          height: 200.0, // Define un tamaño para el contenedor
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: <Widget>[
+              Positioned(
+                top:
+                    20.0, // Ajusta este valor para mover la imagen hacia arriba o hacia abajo
+                right:
+                    100, // Ajusta este valor para mover la imagen hacia la izquierda o hacia la derecha
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(150.0),
+                  child: SizedBox(
+                    height: 150,
+                    width: 150,
+                    child: Image.asset('img/pizza.jpg'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: Color(0xFFFFC700),
+      ),
       body: Stack(
         children: [
           Column(
@@ -199,15 +226,7 @@ class _CompraDetallePageState extends State<DetalleVenta> {
               ),
             ],
           ),
-          Positioned(
-            top: 15,
-            left: 15,
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              iconSize: 40,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
+          
         ],
       ),
     );

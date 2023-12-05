@@ -92,7 +92,7 @@ class _VentasState extends State<Ventas> {
                 top:
                     20.0, // Ajusta este valor para mover la imagen hacia arriba o hacia abajo
                 right:
-                    160, // Ajusta este valor para mover la imagen hacia la izquierda o hacia la derecha
+                    100, // Ajusta este valor para mover la imagen hacia la izquierda o hacia la derecha
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(150.0),
                   child: SizedBox(

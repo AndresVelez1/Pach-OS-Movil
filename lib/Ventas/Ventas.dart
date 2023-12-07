@@ -336,8 +336,18 @@ class _VentasState extends State<Ventas> {
                                   color: Color.fromRGBO(238, 248, 246, 1),
                                   elevation: 0,
                                   child: ListTile(
-                                    leading: Icon(Icons.attach_money,
-                                        color: Color(0xFFFFC700)),
+                                    leading: Icon(
+                                      Icons.attach_money,
+                                      color: (snapshot.data![index]
+                                                  ['estado'] ==
+                                              'Pendiente')
+                                          ? Colors.red
+                                          : ((snapshot.data![index]
+                                                      ['estado'] ==
+                                                  'Pagada')
+                                              ? Colors.green
+                                              : Color(0xFFFFC700)),
+                                    ),
                                     title: Text(
                                       snapshot.data![index]['tipoPago']
                                               ?.toString() ??

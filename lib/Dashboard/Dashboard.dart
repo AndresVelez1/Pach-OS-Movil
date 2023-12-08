@@ -280,7 +280,8 @@ class Dashboard extends StatelessWidget {
             Container(
               alignment: Alignment.center,
               child: buildDifferenceCard(
-                apiVentas: 'http://pachos-001-site1.btempurl.com/Estadisticas/ComprasdelMes',
+                apiVentas:
+                    'http://pachos-001-site1.btempurl.com/Estadisticas/ComprasdelMes',
                 columnKeyDiferencia: 'diferencia',
                 formatValue: true,
               ),
@@ -340,6 +341,7 @@ class Dashboard extends StatelessWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 17,
+                                    color: Color.fromARGB(255, 1, 1, 1),
                                     fontFamily: 'Poppins',
                                   ),
                                   children: <TextSpan>[
@@ -347,6 +349,7 @@ class Dashboard extends StatelessWidget {
                                       text: ' (${soldQuantity.toString()})',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
+                                        color: Color.fromARGB(255, 1, 1, 1),
                                         fontSize: 17,
                                         fontFamily: 'Poppins',
                                       ),
@@ -362,6 +365,7 @@ class Dashboard extends StatelessWidget {
                               Text(
                                 'Total vendido: ${formatCurrency(totalSold)}',
                                 style: TextStyle(
+                                  color: Color.fromARGB(255, 1, 1, 1),
                                   fontSize: 15,
                                   fontFamily: 'Poppins',
                                 ),
